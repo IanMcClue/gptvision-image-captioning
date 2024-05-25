@@ -26,9 +26,6 @@ with st.sidebar:
     st.title("Upload Your Images")
     st.session_state.images = st.file_uploader(label=" ", accept_multiple_files=True)
 
-if "text_prompt" not in st.session_state:
-    st.session_state.text_prompt = st.text_input("Enter a text prompt", "Describe the content of the image.")
-
 def generate_df():
     current_df = pd.DataFrame(
         {
@@ -51,9 +48,21 @@ def generate_df():
     st.session_state.df = new_df
 
 def render_df():
-    st.dataframe(
+    st.data_editor(
         st.session_state.df,
-        columns=["image", "name", "description"],
+        column_config={
+            "image": st.column_config.ImageColumn(
+                "Preview Image", help="Image preview", width=100
+            ),
+            "name": st.column_config.Column("Name", help="Image name", width=200),
+            "description": st.column_config.Column(
+                "Description", help="Image description", width=800
+            ),
+        },
+        hide_index=True,
+        height=500,
+        column_order=["image", "name", "description"],
+        use_container_width=True,
     )
 
 def generate_description(image_base64):
@@ -76,15 +85,3 @@ def generate_description(image_base64):
         max_tokens=50,
     )
     return response.choices[0].message.content
-
-# Generate description for each image
-if st.session_state.images:
-    for img in st.session_state.images:
-        image_base64 = to_base64(img)
-        description = generate_description(image_base64)
-        img_idx = st.session_state.images.index(img)
-        st.session_state.df.loc[st.session_state.df['image_id'] == img.file_id, 'description'] = description
-
-# Display DataFrame and update descriptions
-generate_df()
-render_df()
