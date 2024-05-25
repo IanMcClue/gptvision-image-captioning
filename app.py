@@ -51,21 +51,9 @@ def generate_df():
     st.session_state.df = new_df
 
 def render_df():
-    st.data_editor(
+    st.dataframe(
         st.session_state.df,
-        column_config={
-            "image": st.column_config.ImageColumn(
-                "Preview Image", help="Image preview", width=100
-            ),
-            "name": st.column_config.Column("Name", help="Image name", width=200),
-            "description": st.column_config.Column(
-                "Description", help="Image description", width=800
-            ),
-        },
-        hide_index=True,
-        height=500,
-        column_order=["image", "name", "description"],
-        use_container_width=True,
+        columns=["image", "name", "description"],
     )
 
 def generate_description(image_base64):
@@ -92,7 +80,8 @@ def generate_description(image_base64):
 # Generate description for each image
 if st.session_state.images:
     for img in st.session_state.images:
-        description = generate_description(to_base64(img))
+        image_base64 = to_base64(img)
+        description = generate_description(image_base64)
         img_idx = st.session_state.images.index(img)
         st.session_state.df.loc[st.session_state.df['image_id'] == img.file_id, 'description'] = description
 
