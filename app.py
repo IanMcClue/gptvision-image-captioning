@@ -48,22 +48,36 @@ def generate_df():
     st.session_state.df = new_df
 
 def render_df():
-    st.data_editor(
-        st.session_state.df,
-        column_config={
-            "image": st.column_config.ImageColumn(
-                "Preview Image", help="Image preview", width=100
-            ),
-            "name": st.column_config.Column("Name", help="Image name", width=200),
-            "description": st.column_config.Column(
-                "Description", help="Image description", width=800
-            ),
-        },
-        hide_index=True,
-        height=500,
-        column_order=["image", "name", "description"],
-        use_container_width=True,
-    )
+    columns = st.columns(3)
+    with columns[0]:
+        st.data_editor(
+            st.session_state.df,
+            disabled=False,
+            num_rows="dynamic",
+            column_config={
+                "image": st.column_config.ImageColumn(
+                    "Preview Image", help="Image preview", width=100
+                ),
+                "name": st.column_config.TextColumn(
+                    "Name", help="Image name", width=200
+                ),
+                "description": st.column_config.TextColumn(
+                    "Description", help="Image description", width=800
+                ),
+            },
+            hide_index=True,
+            key="data_editor",
+        )
+    with columns[1]:
+        st.markdown("---")
+        st.subheader("Selected Rows")
+        selected_rows = st.session_state.df[st.session_state.data_editor.selected_rows]
+        st.write(selected_rows)
+    with columns[2]:
+        st.markdown("---")
+        st.subheader("Edited Rows")
+        edited_rows = st.session_state.df[st.session_state.data_editor.edited_rows]
+        st.write(edited_rows)
 
 def generate_description(image_base64):
     response = client.chat.completions.create(
